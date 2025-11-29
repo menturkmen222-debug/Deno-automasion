@@ -1,45 +1,27 @@
-// src/index.ts
 import { serve } from "https://deno.land/std@0.201.0/http/server.ts";
-import { uploadToCloudinary } from "./utils.ts";
-import { addVideoToQueue } from "./db.ts";
-import { runScheduler } from "./scheduler.ts";
+import { readFileStr } from "https://deno.land/std@0.201.0/fs/mod.ts";
 
+// Serve static index.html
 serve(async (req) => {
   const url = new URL(req.url);
 
-  // ============================
-  // /upload-video endpoint
-  // ============================
-  if (url.pathname === "/upload-video" && req.method === "POST") {
-    const formData = await req.formData();
-    const videoFile = formData.get("video") as File;
-    const prompt = formData.get("prompt") as string;
-    const channels = formData.getAll("channels") as string[];
-
-    if (!videoFile || !prompt || channels.length === 0) {
-      return new Response(JSON.stringify({ error: "Missing data" }), { status: 400 });
-    }
-
-    // Cloudinary ga upload
-    const cloudUrl = await uploadToCloudinary(videoFile);
-
-    // Queue ga saqlash
-    await addVideoToQueue({
-      videoUrl: cloudUrl,
-      prompt,
-      channels,
-      status: "pending",
-    });
-
-    return new Response(JSON.stringify({ message: "Video queued", cloudUrl }), { status: 200 });
+  if (url.pathname === "/") {
+    const html = await Deno.readTextFile("./frontend/index.html");
+    return new Response(html, { headers: { "Content-Type": "text/html" } });
   }
 
-  // ============================
-  // /run-schedule endpoint
-  // ============================
+  if (url.pathname === "/upload.js") {
+    const js = await Deno.readTextFile("./frontend/upload.js");
+    return new Response(js, { headers: { "Content-Type": "application/javascript" } });
+  }
+
+  // API endpoints
+  if (url.pathname === "/upload-video" && req.method === "POST") {
+    // ... shu yerda upload-video logikasi
+  }
+
   if (url.pathname === "/run-schedule") {
-    await runScheduler();
-    return new Response(JSON.stringify({ message: "Scheduler executed" }), { status: 200 });
+    // ... shu yerda scheduler
   }
 
   return new Response("Not found", { status: 404 });
