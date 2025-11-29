@@ -1,45 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>AI Shorts Upload</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 2rem; }
-    label { display: block; margin-top: 1rem; }
-    input, select, button { margin-top: 0.5rem; padding: 0.5rem; width: 100%; max-width: 400px; }
-    button { cursor: pointer; }
-  </style>
-</head>
-<body>
-  <h1>Upload AI Short Video</h1>
+import { serve } from "https://deno.land/std@0.201.0/http/server.ts";
+import { readFileStr } from "https://deno.land/std@0.201.0/fs/mod.ts";
 
-  <form id="uploadForm">
-    <label>
-      Video File:
-      <input type="file" name="video" id="video" accept="video/*" required>
-    </label>
+// Serve static index.html
+serve(async (req) => {
+  const url = new URL(req.url);
 
-    <label>
-      Prompt / Title:
-      <input type="text" name="prompt" id="prompt" placeholder="Enter prompt" required>
-    </label>
+  if (url.pathname === "/") {
+    const html = await Deno.readTextFile("./frontend/index.html");
+    return new Response(html, { headers: { "Content-Type": "text/html" } });
+  }
 
-    <label>
-      Select Channels (hold Ctrl/Cmd to select multiple):
-      <select name="channels" id="channels" multiple required>
-        <option value="1">Channel 1</option>
-        <option value="2">Channel 2</option>
-        <option value="3">Channel 3</option>
-        <option value="4">Channel 4</option>
-        <option value="5">Channel 5</option>
-      </select>
-    </label>
+  if (url.pathname === "/upload.js") {
+    const js = await Deno.readTextFile("./frontend/upload.js");
+    return new Response(js, { headers: { "Content-Type": "application/javascript" } });
+  }
 
-    <button type="submit">Upload Video</button>
-  </form>
+  // API endpoints
+  if (url.pathname === "/upload-video" && req.method === "POST") {
+    // ... shu yerda upload-video logikasi
+  }
 
-  <div id="result" style="margin-top:1rem;color:green;"></div>
+  if (url.pathname === "/run-schedule") {
+    // ... shu yerda scheduler
+  }
 
-  <script src="upload.js"></script>
-</body>
-</html>
+  return new Response("Not found", { status: 404 });
+});
