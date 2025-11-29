@@ -1,5 +1,6 @@
+// src/scheduler.ts
 import { getNextVideo, markUploaded } from "./db.ts";
-import { uploadToYouTube } from "./utils.ts";
+import { generateMetadata, uploadToYouTube, uploadToTikTok, uploadToInstagram, uploadToFacebook } from "./utils.ts";
 
 export async function runScheduler() {
   const video = await getNextVideo();
@@ -8,9 +9,13 @@ export async function runScheduler() {
     return;
   }
 
+  const metadata = await generateMetadata(video.prompt);
+
   for (const channel of video.channels) {
-    // Har bir kanalga YouTube upload (keyin TikTok, IG, FB)
-    await uploadToYouTube(video.videoUrl, video.prompt, channel);
+    await uploadToYouTube(video.videoUrl, metadata, channel);
+    await uploadToTikTok(video.videoUrl, metadata, channel);
+    await uploadToInstagram(video.videoUrl, metadata, channel);
+    await uploadToFacebook(video.videoUrl, metadata, channel);
   }
 
   await markUploaded(video);
