@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.201.0/http/server.ts";
 import { uploadToCloudinary, generateMetadata, uploadToYouTube, uploadToTikTok, uploadToInstagram, uploadToFacebook } from "./utils.ts";
 import { addVideoToQueue, getNextVideo, markUploaded } from "./db.ts";
 
-// Static fayl o‘qish funksiyasi
+// Static fa yl o‘qish funksiyasi
 async function serveStaticFile(filePath: string, contentType: string) {
   try {
     const fileContent = await Deno.readTextFile(filePath);
