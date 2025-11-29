@@ -1,0 +1,20 @@
+name: AI Shorts Scheduler
+
+on:
+  schedule:
+    - cron: "0 */2 * * *"
+  workflow_dispatch:
+
+jobs:
+  run_scheduler:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - name: Run Scheduler
+        env:
+          DEN0_DEPLOY_URL: ${{ secrets.DEN0_DEPLOY_URL }}
+        run: |
+          curl -X POST $DEN0_DEPLOY_URL/run-schedule
