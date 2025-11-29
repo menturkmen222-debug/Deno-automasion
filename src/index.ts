@@ -1,38 +1,38 @@
 // src/index.ts
+import { serve } from "https://deno.land/std@0.201.0/http/server.ts";
+import { uploadToCloudinary } from "./utils.ts";
+import { addVideoToQueue } from "./db.ts";
+import { runScheduler } from "./scheduler.ts";
 
-// Oddiy Deno HTTP server
-Deno.serve(async (req) => {
+serve(async (req) => {
   const url = new URL(req.url);
 
-  // Root endpoint
-  if (url.pathname === "/") {
-    return new Response(
-      JSON.stringify({ status: "OK", message: "Deno Server Working" }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
-  }
+  if (url.pathname === "/upload-video" && req.method === "POST") {
+    const formData = await req.formData();
+    const videoFile = formData.get("video") as File;
+    const prompt = formData.get("prompt") as string;
+    const channels = formData.getAll("channels") as string[];
 
-  // Video yaratish endpoint
-  if (url.pathname === "/run") {
-    try {
-      // Bu yerda API chaqiriladi — hozircha demo
-      const result = {
-        success: true,
-        message: "Video queue triggered successfully!",
-        time: new Date().toISOString(),
-      };
-
-      return new Response(JSON.stringify(result), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    } catch (err) {
-      return new Response(JSON.stringify({ success: false, error: err }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
+    if (!videoFile || !prompt || channels.length === 0) {
+      return new Response(JSON.stringify({ error: "Missing data" }), { status: 400 });
     }
+
+    const cloudUrl = await uploadToCloudinary(videoFile);
+
+    await addVideoToQueue({
+      videoUrl: cloudUrl,
+      prompt,
+      channels,
+      status: "pending",
+    });
+
+    return new Response(JSON.stringify({ message: "Video queued", cloudUrl }), { status: 200 });
   }
 
-  return new Response("Not Found", { status: 404 });
+  if (url.pathname === "/run-schedule") {
+    await runScheduler();
+    return new Response(JSON.stringify({ message: "Scheduler executed" }), { status: 200 });
+  }
+
+  return new Response("Not found", { status: 404 });
 });
