@@ -1,23 +1,33 @@
 import { serve } from "https://deno.land/std@0.201.0/http/server.ts";
 
-async function serveStatic(filePath: string, contentType: string) {
-  try {
-    const data = await Deno.readTextFile(filePath);
-    return new Response(data, { headers: { "Content-Type": contentType } });
-  } catch {
-    return new Response("File not found", { status: 404 });
-  }
-}
+const indexHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Shorts Upload</title>
+</head>
+<body>
+  <h1>Upload Video Test</h1>
+  <form id="form">
+    <input type="file" id="video" required />
+    <input type="text" id="prompt" placeholder="Prompt" required />
+    <button type="submit">Upload</button>
+  </form>
+  <script>
+    document.getElementById("form").addEventListener("submit", e => {
+      e.preventDefault();
+      alert("Frontend is working!");
+    });
+  </script>
+</body>
+</html>
+`;
 
-serve(async (req) => {
+serve((req) => {
   const url = new URL(req.url);
-
   if (url.pathname === "/" || url.pathname === "/index.html") {
-    return serveStatic(new URL("../frontend/index.html", import.meta.url).pathname, "text/html");
-  }
-
-  if (url.pathname === "/upload.js") {
-    return serveStatic(new URL("../frontend/upload.js", import.meta.url).pathname, "application/javascript");
+    return new Response(indexHtml, { headers: { "Content-Type": "text/html" } });
   }
 
   if (url.pathname === "/upload-video" && req.method === "POST") {
