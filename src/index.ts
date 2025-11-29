@@ -1,9 +1,8 @@
-// src/index.ts
 import { serve } from "https://deno.land/std@0.201.0/http/server.ts";
 import { uploadToCloudinary, generateMetadata, uploadToYouTube, uploadToTikTok, uploadToInstagram, uploadToFacebook } from "./utils.ts";
 import { addVideoToQueue, getNextVideo, markUploaded } from "./db.ts";
 
-// Serve static files (frontend)
+// Serve static files
 async function serveStaticFile(filePath: string, contentType: string) {
   try {
     const fileContent = await Deno.readTextFile(filePath);
@@ -13,13 +12,10 @@ async function serveStaticFile(filePath: string, contentType: string) {
   }
 }
 
-// Scheduler function
+// Scheduler
 async function runScheduler() {
   const video = await getNextVideo();
-  if (!video) {
-    console.log("No pending videos");
-    return;
-  }
+  if (!video) return;
 
   const metadata = await generateMetadata(video.prompt);
 
@@ -31,30 +27,18 @@ async function runScheduler() {
   }
 
   await markUploaded(video);
-  console.log("Video uploaded to all channels:", video.channels);
 }
 
 // Server
 serve(async (req) => {
   const url = new URL(req.url);
 
-  // ============================
-  // Serve index.html
-  // ============================
-  if (url.pathname === "/" || url.pathname === "/index.html") {
+  if (url.pathname === "/" || url.pathname === "/index.html")
     return serveStaticFile("./frontend/index.html", "text/html");
-  }
 
-  // ============================
-  // Serve upload.js
-  // ============================
-  if (url.pathname === "/upload.js") {
+  if (url.pathname === "/upload.js")
     return serveStaticFile("./frontend/upload.js", "application/javascript");
-  }
 
-  // ============================
-  // /upload-video endpoint
-  // ============================
   if (url.pathname === "/upload-video" && req.method === "POST") {
     try {
       const formData = await req.formData();
@@ -62,14 +46,11 @@ serve(async (req) => {
       const prompt = formData.get("prompt") as string;
       const channels = formData.getAll("channels") as string[];
 
-      if (!videoFile || !prompt || channels.length === 0) {
+      if (!videoFile || !prompt || channels.length === 0)
         return new Response(JSON.stringify({ error: "Missing data" }), { status: 400 });
-      }
 
-      // Cloudinary ga upload
       const cloudUrl = await uploadToCloudinary(videoFile);
 
-      // Queue ga saqlash
       await addVideoToQueue({
         videoUrl: cloudUrl,
         prompt,
@@ -78,15 +59,11 @@ serve(async (req) => {
       });
 
       return new Response(JSON.stringify({ message: "Video queued", cloudUrl }), { status: 200 });
-
     } catch (err) {
       return new Response(JSON.stringify({ error: err.message }), { status: 500 });
     }
   }
 
-  // ============================
-  // /run-schedule endpoint
-  // ============================
   if (url.pathname === "/run-schedule") {
     try {
       await runScheduler();
