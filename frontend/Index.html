@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Shorts Upload</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    label { display: block; margin-top: 1rem; }
+    input, select, button { margin-top: 0.5rem; padding: 0.5rem; width: 100%; max-width: 400px; }
+    button { cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Upload AI Short Video</h1>
+
+  <form id="uploadForm">
+    <label>
+      Video File:
+      <input type="file" name="video" id="video" accept="video/*" required>
+    </label>
+
+    <label>
+      Prompt / Title:
+      <input type="text" name="prompt" id="prompt" placeholder="Enter prompt" required>
+    </label>
+
+    <label>
+      Select Channels (hold Ctrl/Cmd to select multiple):
+      <select name="channels" id="channels" multiple required>
+        <option value="1">Channel 1</option>
+        <option value="2">Channel 2</option>
+        <option value="3">Channel 3</option>
+        <option value="4">Channel 4</option>
+        <option value="5">Channel 5</option>
+      </select>
+    </label>
+
+    <button type="submit">Upload Video</button>
+  </form>
+
+  <div id="result" style="margin-top:1rem;color:green;"></div>
+
+  <script src="upload.js"></script>
+</body>
+</html>
