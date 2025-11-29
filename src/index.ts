@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.201.0/http/server.ts";
 
-const indexHtml = `
-<!DOCTYPE html>
+const indexHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -21,18 +20,10 @@ const indexHtml = `
     });
   </script>
 </body>
-</html>
-`;
+</html>`;
 
-serve((req) => {
-  const url = new URL(req.url);
-  if (url.pathname === "/" || url.pathname === "/index.html") {
-    return new Response(indexHtml, { headers: { "Content-Type": "text/html" } });
-  }
-
-  if (url.pathname === "/upload-video" && req.method === "POST") {
-    return new Response(JSON.stringify({ message: "Video upload endpoint working!" }), { status: 200 });
-  }
-
-  return new Response("Not found", { status: 404 });
+serve((_req) => {
+  return new Response(indexHtml, {
+    headers: { "Content-Type": "text/html" },
+  });
 });
