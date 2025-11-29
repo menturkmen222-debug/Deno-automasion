@@ -1,7 +1,9 @@
-interface VideoQueueItem {
+// src/db.ts
+
+export interface VideoQueueItem {
   videoUrl: string;
   prompt: string;
-  channels: string[];
+  channels: string[]; // ["1", "2", "3"] = kanal raqamlari
   status: "pending" | "uploaded";
 }
 
