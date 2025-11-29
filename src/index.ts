@@ -7,6 +7,9 @@ import { runScheduler } from "./scheduler.ts";
 serve(async (req) => {
   const url = new URL(req.url);
 
+  // ============================
+  // /upload-video endpoint
+  // ============================
   if (url.pathname === "/upload-video" && req.method === "POST") {
     const formData = await req.formData();
     const videoFile = formData.get("video") as File;
@@ -17,8 +20,10 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Missing data" }), { status: 400 });
     }
 
+    // Cloudinary ga upload
     const cloudUrl = await uploadToCloudinary(videoFile);
 
+    // Queue ga saqlash
     await addVideoToQueue({
       videoUrl: cloudUrl,
       prompt,
@@ -29,6 +34,9 @@ serve(async (req) => {
     return new Response(JSON.stringify({ message: "Video queued", cloudUrl }), { status: 200 });
   }
 
+  // ============================
+  // /run-schedule endpoint
+  // ============================
   if (url.pathname === "/run-schedule") {
     await runScheduler();
     return new Response(JSON.stringify({ message: "Scheduler executed" }), { status: 200 });
